@@ -1,4 +1,5 @@
-const screen = document.getElementById('screen');
+const screen = document.getElementById('screen');    // For displaying current input or result
+const equationDisplay = document.getElementById('equation');  // For displaying the ongoing equation
 const keys = document.querySelector('.calculator-keys');
 
 let currentInput = '0';    // Current input on the screen
@@ -23,15 +24,14 @@ keys.addEventListener('click', event => {
     }
 
     screen.value = currentInput;
+    updateEquationDisplay();  // Update the equation display with each click
 });
 
 function handleDigit(digit) {
-    // If we are waiting for the second operand, reset the screen
     if (waitingForSecondOperand) {
         currentInput = digit;
         waitingForSecondOperand = false;
     } else {
-        // Prevent multiple decimal points
         if (digit === '.' && currentInput.includes('.')) return;
         currentInput = currentInput === '0' ? digit : currentInput + digit;
     }
@@ -43,30 +43,30 @@ function handleOperator(nextOperator) {
         return;
     }
 
-    // If an operator is selected and no second operand is entered, do nothing
+    if (nextOperator === '=') {
+        if (operator && previousInput !== '') {
+            currentInput = String(calculate(previousInput, operator, currentInput));
+            previousInput = '';
+            operator = '';
+        }
+        waitingForSecondOperand = true;
+        return;
+    }
+
     if (operator && waitingForSecondOperand) {
         operator = nextOperator;
         return;
     }
 
-    // When an operator is clicked, calculate the result if applicable
     if (previousInput === '') {
         previousInput = currentInput;
     } else if (operator) {
-        const result = calculate(previousInput, operator, currentInput);
-        currentInput = String(result);
+        currentInput = String(calculate(previousInput, operator, currentInput));
         previousInput = currentInput;
     }
 
     operator = nextOperator;
-
-    // Set flag to wait for the next number input (second operand)
     waitingForSecondOperand = true;
-
-    // If equal sign is clicked, reset the operator
-    if (nextOperator === '=') {
-        operator = '';
-    }
 }
 
 function calculate(firstOperand, operator, secondOperand) {
@@ -89,9 +89,18 @@ function calculate(firstOperand, operator, secondOperand) {
     }
 }
 
+function updateEquationDisplay() {
+    if (operator && !waitingForSecondOperand) {
+        equationDisplay.textContent = `${previousInput} ${operator} ${currentInput}`;
+    } else {
+        equationDisplay.textContent = previousInput ? `${previousInput} ${operator}` : '';
+    }
+}
+
 function resetCalculator() {
     currentInput = '0';
     previousInput = '';
     operator = '';
     waitingForSecondOperand = false;
+    equationDisplay.textContent = '';  // Clear the equation display
 }
