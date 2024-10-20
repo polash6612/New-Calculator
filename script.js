@@ -46,25 +46,19 @@ function handleOperator(nextOperator) {
     if (nextOperator === '=') {
         if (operator && previousInput !== '') {
             currentInput = String(calculate(previousInput, operator, currentInput));
-            previousInput = '';
             operator = '';
+            previousInput = '';
         }
         waitingForSecondOperand = true;
         return;
     }
 
-    if (operator && waitingForSecondOperand) {
-        operator = nextOperator;
-        return;
-    }
-
-    if (previousInput === '') {
-        previousInput = currentInput;
-    } else if (operator) {
+    // If there's an existing operator and input, calculate before assigning new operator
+    if (operator && previousInput !== '') {
         currentInput = String(calculate(previousInput, operator, currentInput));
-        previousInput = currentInput;
     }
 
+    previousInput = currentInput;
     operator = nextOperator;
     waitingForSecondOperand = true;
 }
@@ -90,10 +84,11 @@ function calculate(firstOperand, operator, secondOperand) {
 }
 
 function updateEquationDisplay() {
-    if (operator && !waitingForSecondOperand) {
+    // Update the equation display only when there's a previous input and operator
+    if (previousInput && operator) {
         equationDisplay.textContent = `${previousInput} ${operator} ${currentInput}`;
     } else {
-        equationDisplay.textContent = previousInput ? `${previousInput} ${operator}` : '';
+        equationDisplay.textContent = currentInput;  // Show current input by default
     }
 }
 
