@@ -9,6 +9,7 @@ keys.addEventListener('click', event => {
     const { target } = event;
     const { value } = target;
 
+    // Only proceed if a button is clicked
     if (!target.matches('button')) return;
 
     switch (value) {
@@ -16,13 +17,18 @@ keys.addEventListener('click', event => {
         case '-':
         case '*':
         case '/':
+            if (currentInput === '') return; // Prevent operator without a number
             operator = value;
             previousInput = currentInput;
             currentInput = '';
             break;
         case '=':
-            if (previousInput === '' || currentInput === '') return;
-            currentInput = String(eval(`${previousInput} ${operator} ${currentInput}`));
+            if (previousInput === '' || currentInput === '') return; // Prevent '=' without both operands
+            try {
+                currentInput = String(eval(`${previousInput} ${operator} ${currentInput}`));
+            } catch (error) {
+                currentInput = 'Error'; // In case of invalid evaluation
+            }
             operator = '';
             previousInput = '';
             break;
@@ -32,9 +38,9 @@ keys.addEventListener('click', event => {
             operator = '';
             break;
         default:
-            currentInput += value;
+            currentInput += value; // Append clicked value to current input
             break;
     }
 
-    screen.value = currentInput;
+    screen.value = currentInput || '0'; // Display the current input or 0 if empty
 });
